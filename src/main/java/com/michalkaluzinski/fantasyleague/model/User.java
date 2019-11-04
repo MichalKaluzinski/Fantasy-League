@@ -1,5 +1,6 @@
 package com.michalkaluzinski.fantasyleague.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -19,4 +20,9 @@ public class User {
   private Integer id;
 
   private String login;
+  
+  private String email;
+  
+  @Column(nullable = false, columnDefinition = "TINYINT", length = 1)
+  private boolean enabled;
 }

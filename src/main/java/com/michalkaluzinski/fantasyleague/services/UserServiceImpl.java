@@ -12,8 +12,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.michalkaluzinski.fantasyleague.model.User;
-import com.michalkaluzinski.fantasyleague.model.VerificationToken;
+import com.michalkaluzinski.fantasyleague.converters.UserRegistrationDTOToUserConverter;
+import com.michalkaluzinski.fantasyleague.converters.UserToUserDTOConverter;
+import com.michalkaluzinski.fantasyleague.dtos.UserDTO;
+import com.michalkaluzinski.fantasyleague.dtos.UserLoginDTO;
+import com.michalkaluzinski.fantasyleague.dtos.UserRegistrationDTO;
+import com.michalkaluzinski.fantasyleague.entities.User;
+import com.michalkaluzinski.fantasyleague.entities.VerificationToken;
 import com.michalkaluzinski.fantasyleague.repositories.UserRepository;
 import com.michalkaluzinski.fantasyleague.repositories.VerificationTokenRepository;
 import io.jsonwebtoken.Jwts;
@@ -30,23 +35,28 @@ public class UserServiceImpl implements UserService {
 
   @Autowired private PasswordEncoder passwordEncoder;
 
+  @Autowired private UserToUserDTOConverter userToUserDTOConverter;
+
+  @Autowired private UserRegistrationDTOToUserConverter userRegistrationDTOToUserConverter;
+
   @Value("${jwt.secret.key}")
   private String secretKey;
 
   @Override
-  public List<User> findAll() {
-    List<User> users = new ArrayList<>();
-    userRepository.findAll().forEach(users::add);
-    return users;
+  public List<UserDTO> findAll() {
+    List<UserDTO> userDTOs = new ArrayList<>();
+    userRepository.findAll().forEach(user -> userDTOs.add(userToUserDTOConverter.convert(user)));
+    return userDTOs;
   }
 
   @Override
   @Transactional(rollbackFor = IOException.class)
-  public void register(User user) throws IOException {
+  public void register(UserRegistrationDTO userRegistrationDTO) throws IOException {
+    User user = userRegistrationDTOToUserConverter.convert(userRegistrationDTO);
     user.setPassword(passwordEncoder.encode(user.getPassword()));
-    User savedUser = userRepository.save(user);
+    user = userRepository.save(user);
     VerificationToken verificationToken = new VerificationToken();
-    verificationToken.setUserId(savedUser.getId());
+    verificationToken.setUserId(user.getId());
     verificationToken.setToken(UUID.randomUUID().toString());
     verificationToken.setExpirationDate(new Timestamp(System.currentTimeMillis() + 3600000));
     verificationTokenRepository.save(verificationToken);
@@ -68,14 +78,14 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public String login(User user) {
-    Optional<User> userOptional = userRepository.findByLogin(user.getLogin());
+  public String login(UserLoginDTO userLoginDTO) {
+    Optional<User> userOptional = userRepository.findByLogin(userLoginDTO.getLogin());
     String token = null;
     if (userOptional.isPresent()
-        && passwordEncoder.matches(user.getPassword(), userOptional.get().getPassword())) {
+        && passwordEncoder.matches(userLoginDTO.getPassword(), userOptional.get().getPassword())) {
       token =
           Jwts.builder()
-              .setSubject(user.getLogin())
+              .setSubject(userLoginDTO.getLogin())
               .setIssuedAt(new Date(System.currentTimeMillis()))
               .setExpiration(new Date(System.currentTimeMillis() + 600000))
               .signWith(SignatureAlgorithm.HS512, secretKey)

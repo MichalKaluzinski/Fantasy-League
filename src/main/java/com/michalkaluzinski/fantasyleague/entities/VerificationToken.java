@@ -1,4 +1,4 @@
-package com.michalkaluzinski.fantasyleague.model;
+package com.michalkaluzinski.fantasyleague.entities;
 
 import java.sql.Timestamp;
 import javax.persistence.Column;

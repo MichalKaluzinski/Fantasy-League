@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import com.michalkaluzinski.fantasyleague.model.User;
+import com.michalkaluzinski.fantasyleague.dtos.UserDTO;
+import com.michalkaluzinski.fantasyleague.dtos.UserLoginDTO;
+import com.michalkaluzinski.fantasyleague.dtos.UserRegistrationDTO;
 import com.michalkaluzinski.fantasyleague.services.UserService;
 
 @Controller
@@ -20,13 +22,13 @@ public class UserController {
   @Autowired private UserService userService;
 
   @GetMapping
-  public ResponseEntity<List<User>> findAll() {
+  public ResponseEntity<List<UserDTO>> findAll() {
     return new ResponseEntity<>(userService.findAll(), HttpStatus.OK);
   }
 
   @PostMapping
-  public ResponseEntity<String> register(@RequestBody User user) throws Exception {
-    userService.register(user);
+  public ResponseEntity<String> register(@RequestBody UserRegistrationDTO userRegistrationDTO) throws Exception {
+    userService.register(userRegistrationDTO);
     return new ResponseEntity<>("success", HttpStatus.OK);
   }
 
@@ -37,7 +39,7 @@ public class UserController {
   }
 
   @PostMapping("/login")
-  public ResponseEntity<String> login(@RequestBody User user) {
-    return new ResponseEntity<>(userService.login(user), HttpStatus.OK);
+  public ResponseEntity<String> login(@RequestBody UserLoginDTO userLoginDTO) {
+    return new ResponseEntity<>(userService.login(userLoginDTO), HttpStatus.OK);
   }
 }

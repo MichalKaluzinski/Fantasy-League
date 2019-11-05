@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.michalkaluzinski.fantasyleague.model.User;
@@ -22,6 +23,8 @@ public class UserServiceImpl implements UserService {
   @Autowired private VerificationTokenRepository verificationTokenRepository;
 
   @Autowired private EmailService emailService;
+  
+  @Autowired private PasswordEncoder passwordEncoder;
 
   @Override
   public List<User> findAll() {
@@ -33,6 +36,7 @@ public class UserServiceImpl implements UserService {
   @Override
   @Transactional(rollbackFor = IOException.class)
   public void register(User user) throws IOException {
+    user.setPassword(passwordEncoder.encode(user.getPassword()));
     User savedUser = userRepository.save(user);
     VerificationToken verificationToken = new VerificationToken();
     verificationToken.setUserId(savedUser.getId());

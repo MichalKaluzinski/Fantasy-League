@@ -21,6 +21,8 @@ public class User {
 
   private String login;
   
+  private String password;
+  
   private String email;
   
   @Column(nullable = false, columnDefinition = "TINYINT", length = 1)

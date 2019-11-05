@@ -11,4 +11,6 @@ public interface UserService {
   public void register(User user) throws IOException;
   
   public void confirmRegistration(String token);
+  
+  public String login(User user);
 }

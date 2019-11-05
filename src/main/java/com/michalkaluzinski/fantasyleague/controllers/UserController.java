@@ -35,4 +35,9 @@ public class UserController {
     userService.confirmRegistration(token);
     return new ResponseEntity<>("success", HttpStatus.OK);
   }
+
+  @PostMapping("/login")
+  public ResponseEntity<String> login(@RequestBody User user) {
+    return new ResponseEntity<>(userService.login(user), HttpStatus.OK);
+  }
 }

@@ -20,7 +20,7 @@ public class EmailServiceImpl implements EmailService {
     Email from = new Email("test@example.com");
     String subject = "Sending with SendGrid is Fun";
     Email to = new Email(addressTo);
-    Content content = new Content("text/html", "and easy to do anywhere, even with Java");
+    Content content = new Content("text/html", "Click to confirm registration:");
     Mail mail = new Mail(from, subject, to, content);
     mail.setTemplateId("3f79e148-a65b-45d8-8560-e46aca9bec75");
     mail.personalization.get(0).addSubstitution("-token-", token);

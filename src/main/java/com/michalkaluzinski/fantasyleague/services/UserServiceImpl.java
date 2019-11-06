@@ -3,12 +3,17 @@ package com.michalkaluzinski.fantasyleague.services;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,12 +22,15 @@ import com.michalkaluzinski.fantasyleague.converters.UserToUserDTOConverter;
 import com.michalkaluzinski.fantasyleague.dtos.UserDTO;
 import com.michalkaluzinski.fantasyleague.dtos.UserLoginDTO;
 import com.michalkaluzinski.fantasyleague.dtos.UserRegistrationDTO;
+import com.michalkaluzinski.fantasyleague.entities.Authority;
 import com.michalkaluzinski.fantasyleague.entities.User;
+import com.michalkaluzinski.fantasyleague.entities.UserAuthority;
+import com.michalkaluzinski.fantasyleague.entities.UserAuthorityPK;
 import com.michalkaluzinski.fantasyleague.entities.VerificationToken;
+import com.michalkaluzinski.fantasyleague.repositories.AuthorityRepository;
+import com.michalkaluzinski.fantasyleague.repositories.UserAuthorityRepository;
 import com.michalkaluzinski.fantasyleague.repositories.UserRepository;
 import com.michalkaluzinski.fantasyleague.repositories.VerificationTokenRepository;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -31,6 +39,10 @@ public class UserServiceImpl implements UserService {
 
   @Autowired private VerificationTokenRepository verificationTokenRepository;
 
+  @Autowired private AuthorityRepository authorityRepository;
+
+  @Autowired private UserAuthorityRepository userAuthorityRepository;
+
   @Autowired private EmailService emailService;
 
   @Autowired private PasswordEncoder passwordEncoder;
@@ -38,6 +50,10 @@ public class UserServiceImpl implements UserService {
   @Autowired private UserToUserDTOConverter userToUserDTOConverter;
 
   @Autowired private UserRegistrationDTOToUserConverter userRegistrationDTOToUserConverter;
+
+  @Autowired private AuthenticationManager authenticationManager;
+
+  @Autowired private JwtTokenProviderService jwtTokenProviderService;
 
   @Value("${jwt.secret.key}")
   private String secretKey;
@@ -55,6 +71,12 @@ public class UserServiceImpl implements UserService {
     User user = userRegistrationDTOToUserConverter.convert(userRegistrationDTO);
     user.setPassword(passwordEncoder.encode(user.getPassword()));
     user = userRepository.save(user);
+    UserAuthorityPK userAuthorityPK = new UserAuthorityPK();
+    userAuthorityPK.setAuthorityId(authorityRepository.findByName("ROLE_USER").getId());
+    userAuthorityPK.setUserId(user.getId());
+    UserAuthority userAuthority = new UserAuthority();
+    userAuthority.setUserAuthorityPK(userAuthorityPK);
+    userAuthorityRepository.save(userAuthority);
     VerificationToken verificationToken = new VerificationToken();
     verificationToken.setUserId(user.getId());
     verificationToken.setToken(UUID.randomUUID().toString());
@@ -79,18 +101,26 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public String login(UserLoginDTO userLoginDTO) {
-    Optional<User> userOptional = userRepository.findByLogin(userLoginDTO.getLogin());
-    String token = null;
-    if (userOptional.isPresent()
-        && passwordEncoder.matches(userLoginDTO.getPassword(), userOptional.get().getPassword())) {
-      token =
-          Jwts.builder()
-              .setSubject(userLoginDTO.getLogin())
-              .setIssuedAt(new Date(System.currentTimeMillis()))
-              .setExpiration(new Date(System.currentTimeMillis() + 600000))
-              .signWith(SignatureAlgorithm.HS512, secretKey)
-              .compact();
+    String username = userLoginDTO.getLogin();
+    String password = userLoginDTO.getPassword();
+    try {
+      authenticationManager.authenticate(
+          new UsernamePasswordAuthenticationToken(username, password));
+      String token =
+          jwtTokenProviderService.createToken(
+              username,
+              new HashSet<String>(
+                  userRepository
+                      .findByLogin(username)
+                      .get()
+                      .getUserAuthorities()
+                      .stream()
+                      .map(UserAuthority::getAuthority)
+                      .map(Authority::getName)
+                      .collect(Collectors.toList())));
+      return "Bearer " + token;
+    } catch (AuthenticationException e) {
+      throw new BadCredentialsException("Invalid username/password supplied");
     }
-    return token;
   }
 }

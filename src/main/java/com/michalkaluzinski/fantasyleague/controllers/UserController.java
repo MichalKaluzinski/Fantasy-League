@@ -21,11 +21,6 @@ public class UserController {
 
   @Autowired private UserService userService;
 
-  @GetMapping
-  public ResponseEntity<List<UserDTO>> findAll() {
-    return new ResponseEntity<>(userService.findAll(), HttpStatus.OK);
-  }
-
   @PostMapping
   public ResponseEntity<String> register(@RequestBody UserRegistrationDTO userRegistrationDTO) throws Exception {
     userService.register(userRegistrationDTO);

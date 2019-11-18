@@ -13,13 +13,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.michalkaluzinski.fantasyleague.converters.UserRegistrationDTOToUserConverter;
 import com.michalkaluzinski.fantasyleague.converters.UserToUserDTOConverter;
 import com.michalkaluzinski.fantasyleague.dtos.UserDTO;
+import com.michalkaluzinski.fantasyleague.dtos.UserLoggedDTO;
 import com.michalkaluzinski.fantasyleague.dtos.UserLoginDTO;
 import com.michalkaluzinski.fantasyleague.dtos.UserRegistrationDTO;
 import com.michalkaluzinski.fantasyleague.entities.Authority;
@@ -100,27 +103,51 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public String login(UserLoginDTO userLoginDTO) {
+  public UserLoggedDTO login(UserLoginDTO userLoginDTO) {
     String username = userLoginDTO.getLogin();
     String password = userLoginDTO.getPassword();
     try {
       authenticationManager.authenticate(
           new UsernamePasswordAuthenticationToken(username, password));
+      Optional<User> userOptional = userRepository.findByLogin(username);
+      if (!userOptional.isPresent()) {
+        throw new UsernameNotFoundException("Username not found.");
+      }
       String token =
           jwtTokenProviderService.createToken(
               username,
               new HashSet<String>(
-                  userRepository
-                      .findByLogin(username)
+                  userOptional
                       .get()
                       .getUserAuthorities()
                       .stream()
                       .map(UserAuthority::getAuthority)
                       .map(Authority::getName)
                       .collect(Collectors.toList())));
-      return "Bearer " + token;
+      UserLoggedDTO userLoggedDTO = new UserLoggedDTO();
+      userLoggedDTO.setId(userOptional.get().getId());
+      userLoggedDTO.setToken("Bearer " + token);
+      return userLoggedDTO;
     } catch (AuthenticationException e) {
       throw new BadCredentialsException("Invalid username/password supplied");
     }
+  }
+
+  @Override
+  public UserDTO findById(Integer id) {
+    Optional<User> userOptional = userRepository.findById(id);
+    if (!userOptional.isPresent()) {
+      return null;
+    }
+
+    return userToUserDTOConverter.convert(userOptional.get());
+  }
+
+  @Override
+  public boolean userExists(Authentication authentication, Integer id) {
+    Optional<User> userOptional = userRepository.findById(id);
+
+    return (userOptional.isPresent()
+        && authentication.getName().equals(userOptional.get().getLogin()));
   }
 }

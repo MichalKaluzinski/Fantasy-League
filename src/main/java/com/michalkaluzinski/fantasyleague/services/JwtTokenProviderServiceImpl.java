@@ -20,8 +20,10 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class JwtTokenProviderServiceImpl implements JwtTokenProviderService {
   @Value("${jwt.secret.key}")
   private String secretKey;
@@ -88,6 +90,7 @@ public class JwtTokenProviderServiceImpl implements JwtTokenProviderService {
 
       return true;
     } catch (JwtException | IllegalArgumentException e) {
+      log.info("{}", e);
       throw new InvalidJwtAuthenticationException("Expired or invalid JWT token");
     }
   }

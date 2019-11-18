@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -27,6 +28,19 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
   }
 
   @Override
+  public void configure(WebSecurity web) {
+    web.ignoring()
+        .antMatchers(
+            "/v2/api-docs",
+            "/configuration/ui",
+            "/swagger-resources/**",
+            "/configuration/security",
+            "/swagger-ui.html",
+            "/webjars/**",
+            "/favicon.ico");
+  }
+
+  @Override
   protected void configure(HttpSecurity http) throws Exception {
     http.csrf()
         .disable()
@@ -37,6 +51,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         .permitAll()
         .antMatchers(HttpMethod.GET, "/users/confirmRegistration")
         .permitAll()
+        .antMatchers(HttpMethod.GET, "/users/{id}/**")
+        .access("@userServiceImpl.userExists(authentication,#id)")
         .and()
         .apply(new JwtConfigurer(jwtTokenProvider));
   }

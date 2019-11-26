@@ -1,4 +1,4 @@
-package com.michalkaluzinski.fantasyleague.controllers;
+package com.michalkaluzinski.fantasyleague.controllers.admin;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,15 +7,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import com.michalkaluzinski.fantasyleague.dtos.UserDTO;
-import com.michalkaluzinski.fantasyleague.services.UserService;
+import com.michalkaluzinski.fantasyleague.dtos.LeagueDTO;
+import com.michalkaluzinski.fantasyleague.services.LeagueService;
 import io.swagger.annotations.ApiImplicitParam;
 
 @Controller
-@RequestMapping("/admin")
-public class AdminController {
+@RequestMapping("/admin/leagues")
+public class AdminLeagueController {
 
-  @Autowired private UserService userService;
+  @Autowired private LeagueService leagueService;
 
   @ApiImplicitParam(
       name = "Authorization",
@@ -25,8 +25,8 @@ public class AdminController {
       paramType = "header",
       dataTypeClass = String.class,
       example = "Bearer access_token")
-  @GetMapping("/users")
-  public ResponseEntity<List<UserDTO>> findAll() {
-    return new ResponseEntity<>(userService.findAll(), HttpStatus.OK);
+  @GetMapping("/")
+  public ResponseEntity<List<LeagueDTO>> findAll() {
+    return new ResponseEntity<>(leagueService.findAll(), HttpStatus.OK);
   }
 }

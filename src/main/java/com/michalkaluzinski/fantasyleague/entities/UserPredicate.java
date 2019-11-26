@@ -25,4 +25,8 @@ public class UserPredicate implements Serializable {
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "gameId", insertable = false, updatable = false)
   private Game game;
+
+  private Integer homeTeamScorePredicate;
+
+  private Integer awayTeamScorePredicate;
 }

@@ -1,11 +1,13 @@
 package com.michalkaluzinski.fantasyleague.entities;
 
+import java.util.Set;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,4 +27,7 @@ public class CustomLeague {
   @ManyToOne
   @JoinColumn(name = "leagueId", insertable = false, updatable = false)
   private League league;
+
+  @OneToMany(mappedBy = "customLeague")
+  private Set<UserCustomLeague> userCustomLeagues;
 }

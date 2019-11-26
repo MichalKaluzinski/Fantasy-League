@@ -20,7 +20,7 @@ public class Team {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;
 
-  private Integer name;
+  private String name;
 
   @ManyToOne
   @JoinColumn(name = "leagueId", insertable = false, updatable = false)

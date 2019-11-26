@@ -1,14 +1,14 @@
 package com.michalkaluzinski.fantasyleague.entities;
 
 import javax.persistence.Entity;
-import javax.persistence.GenerationType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import lombok.Setter;
 import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name =  "game")

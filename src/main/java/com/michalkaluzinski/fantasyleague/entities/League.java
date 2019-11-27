@@ -27,6 +27,6 @@ public class League {
   @Column(nullable = false, columnDefinition = "TINYINT", length = 1)
   private boolean active;
 
-  @OneToMany(mappedBy = "league", fetch = FetchType.EAGER)
+  @OneToMany(mappedBy = "league", fetch = FetchType.EAGER, orphanRemoval = true)
   private Set<Team> teams;
 }

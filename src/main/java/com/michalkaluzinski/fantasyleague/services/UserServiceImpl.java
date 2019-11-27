@@ -1,6 +1,5 @@
 package com.michalkaluzinski.fantasyleague.services;
 
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -30,6 +29,8 @@ import com.michalkaluzinski.fantasyleague.entities.User;
 import com.michalkaluzinski.fantasyleague.entities.UserAuthority;
 import com.michalkaluzinski.fantasyleague.entities.UserAuthorityPK;
 import com.michalkaluzinski.fantasyleague.entities.VerificationToken;
+import com.michalkaluzinski.fantasyleague.exceptions.ResourceExistsException;
+import com.michalkaluzinski.fantasyleague.exceptions.RestApiException;
 import com.michalkaluzinski.fantasyleague.repositories.AuthorityRepository;
 import com.michalkaluzinski.fantasyleague.repositories.UserAuthorityRepository;
 import com.michalkaluzinski.fantasyleague.repositories.UserRepository;
@@ -69,8 +70,16 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  @Transactional(rollbackFor = IOException.class)
-  public void register(UserRegistrationDTO userRegistrationDTO) throws IOException {
+  @Transactional
+  public void register(UserRegistrationDTO userRegistrationDTO) throws RestApiException {
+    if (userRepository.findByLogin(userRegistrationDTO.getLogin()).isPresent()) {
+      throw new ResourceExistsException(
+          String.format("Account with login: %s exists.", userRegistrationDTO.getLogin()));
+    }
+    if (userRepository.findByEmail(userRegistrationDTO.getEmail()).isPresent()) {
+      throw new ResourceExistsException(
+          String.format("Account with mail: %s exists.", userRegistrationDTO.getEmail()));
+    }
     User user = userRegistrationDTOToUserConverter.convert(userRegistrationDTO);
     user.setPassword(passwordEncoder.encode(user.getPassword()));
     user = userRepository.save(user);

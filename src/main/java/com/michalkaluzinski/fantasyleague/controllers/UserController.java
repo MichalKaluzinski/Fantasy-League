@@ -14,6 +14,7 @@ import com.michalkaluzinski.fantasyleague.dtos.UserDTO;
 import com.michalkaluzinski.fantasyleague.dtos.UserLoggedDTO;
 import com.michalkaluzinski.fantasyleague.dtos.UserLoginDTO;
 import com.michalkaluzinski.fantasyleague.dtos.UserRegistrationDTO;
+import com.michalkaluzinski.fantasyleague.exceptions.RestApiException;
 import com.michalkaluzinski.fantasyleague.services.UserService;
 import io.swagger.annotations.ApiImplicitParam;
 
@@ -25,7 +26,7 @@ public class UserController {
 
   @PostMapping
   public ResponseEntity<String> register(@RequestBody UserRegistrationDTO userRegistrationDTO)
-      throws Exception {
+      throws RestApiException {
     userService.register(userRegistrationDTO);
     return new ResponseEntity<>("success", HttpStatus.OK);
   }

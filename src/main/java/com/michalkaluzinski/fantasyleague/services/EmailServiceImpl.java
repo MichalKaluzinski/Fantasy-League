@@ -3,6 +3,8 @@ package com.michalkaluzinski.fantasyleague.services;
 import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.michalkaluzinski.fantasyleague.exceptions.EmailException;
+import com.michalkaluzinski.fantasyleague.exceptions.RestApiException;
 import com.sendgrid.Method;
 import com.sendgrid.Request;
 import com.sendgrid.SendGrid;
@@ -16,7 +18,8 @@ public class EmailServiceImpl implements EmailService {
   @Autowired private SendGrid sendGrid;
 
   @Override
-  public void sendRegistrationVerificationEmail(String addressTo, String token) throws IOException {
+  public void sendRegistrationVerificationEmail(String addressTo, String token)
+      throws RestApiException {
     Email from = new Email("test@example.com");
     String subject = "Sending with SendGrid is Fun";
     Email to = new Email(addressTo);
@@ -27,7 +30,11 @@ public class EmailServiceImpl implements EmailService {
     Request request = new Request();
     request.setMethod(Method.POST);
     request.setEndpoint("mail/send");
-    request.setBody(mail.build());
-    sendGrid.api(request);
+    try {
+      request.setBody(mail.build());
+      sendGrid.api(request);
+    } catch (IOException e) {
+      throw new EmailException("Unable to send verification mail.");
+    }
   }
 }

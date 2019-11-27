@@ -23,6 +23,6 @@ public class Team {
   private String name;
 
   @ManyToOne
-  @JoinColumn(name = "leagueId", insertable = false, updatable = false)
+  @JoinColumn(name = "leagueId", insertable = true, updatable = false)
   private League league;
 }

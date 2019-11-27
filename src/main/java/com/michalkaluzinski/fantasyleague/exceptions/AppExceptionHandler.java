@@ -35,4 +35,12 @@ public class AppExceptionHandler {
     exceptionDTO.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
     return new ResponseEntity<>(exceptionDTO, HttpStatus.OK);
   }
+  
+  @ExceptionHandler(value = NotFoundException.class)
+  public ResponseEntity<ExceptionDTO> handleNotFoundException(Exception exception) {
+    ExceptionDTO exceptionDTO = new ExceptionDTO();
+    exceptionDTO.setMessage(exception.getMessage());
+    exceptionDTO.setStatusCode(HttpStatus.NOT_FOUND.value());
+    return new ResponseEntity<>(exceptionDTO, HttpStatus.OK);
+  }
 }

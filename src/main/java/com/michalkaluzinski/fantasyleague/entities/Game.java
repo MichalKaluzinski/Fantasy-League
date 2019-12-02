@@ -1,5 +1,7 @@
 package com.michalkaluzinski.fantasyleague.entities;
 
+import java.sql.Timestamp;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -37,4 +39,7 @@ public class Game {
   private Integer homeTeamScore;
   
   private Integer awayTeamScore;
+  
+  @Column(name = "start_at")
+  private Timestamp startAt;
 }

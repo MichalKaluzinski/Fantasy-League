@@ -1,5 +1,6 @@
 package com.michalkaluzinski.fantasyleague.controllers;
 
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,7 @@ public class UserController {
   @Autowired private UserService userService;
 
   @PostMapping
-  public ResponseEntity<String> register(@RequestBody UserRegistrationDTO userRegistrationDTO)
+  public ResponseEntity<String> register(@Valid @RequestBody UserRegistrationDTO userRegistrationDTO)
       throws RestApiException {
     userService.register(userRegistrationDTO);
     return new ResponseEntity<>("success", HttpStatus.OK);

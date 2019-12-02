@@ -29,7 +29,6 @@ public class User implements Serializable {
 
   private String password;
 
-  @Email(message = "Email should be valid.")
   private String email;
 
   @Column(nullable = false, columnDefinition = "TINYINT", length = 1)

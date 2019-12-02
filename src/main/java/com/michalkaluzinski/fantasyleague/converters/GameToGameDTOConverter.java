@@ -18,6 +18,7 @@ public class GameToGameDTOConverter implements Converter<Game, GameDTO> {
     gameDTO.setRound(source.getRound());
     gameDTO.setHomeTeamScore(source.getHomeTeamScore());
     gameDTO.setAwayTeamScore(source.getAwayTeamScore());
+    gameDTO.setStartAt(source.getStartAt());
     return gameDTO;
   }
 }

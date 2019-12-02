@@ -1,5 +1,6 @@
 package com.michalkaluzinski.fantasyleague.dtos;
 
+import javax.validation.constraints.Email;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -7,5 +8,6 @@ import lombok.Setter;
 @Setter
 public class UserRegistrationDTO extends UserLoginDTO {
 
+  @Email(message = "Email should be valid.")
   private String email;
 }

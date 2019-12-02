@@ -10,6 +10,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.Email;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -28,6 +29,7 @@ public class User implements Serializable {
 
   private String password;
 
+  @Email(message = "Email should be valid.")
   private String email;
 
   @Column(nullable = false, columnDefinition = "TINYINT", length = 1)
